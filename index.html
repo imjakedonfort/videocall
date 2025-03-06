@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Game</title>
+  <style>
+    /* Reset de bază */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: sans-serif;
+      background: #222;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Ecranul de apel */
+    #call-screen {
+      text-align: center;
+      max-width: 300px;
+      padding: 20px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #303030, #191919);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 1s ease forwards;
+    }
+
+    #caller {
+      font-size: 1.5rem;
+      margin-bottom: 5px;
+    }
+
+    #status {
+      font-size: 1rem;
+      opacity: 0.7;
+      margin-bottom: 20px;
+    }
+
+    /* Imaginea / avatarul apelantului */
+    #avatar {
+      width: 80px;
+      height: 80px;
+      background: #666;
+      border-radius: 50%;
+      margin-bottom: 20px;
+      background-image: url("avatar.png"); /* De exemplu */
+      background-size: cover;
+      background-position: center;
+    }
+
+    /* Butoane Accept / Decline */
+    .call-button {
+      border: none;
+      outline: none;
+      padding: 10px 20px;
+      border-radius: 50px;
+      margin: 0 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      width: 100px;
+      color: #fff;
+    }
+
+    .call-button:active {
+      transform: scale(0.95);
+    }
+
+    #decline-btn {
+      background-color: #d40000;
+    }
+
+    #accept-btn {
+      background-color: #00b200;
+    }
+
+    /* Containere pentru butoane */
+    #buttons-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Ecranul video */
+    #video-screen {
+      position: absolute;
+      top: 0; 
+      left: 0; 
+      width: 100vw;
+      height: 100vh;
+      background-color: #000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 10;
+    }
+
+    #mysterious-video {
+      width: 80%;
+      max-width: 800px;
+      outline: none;
+    }
+
+    /* Mesajul final */
+    #final-message {
+      position: absolute;
+      top: 0; 
+      left: 0; 
+      width: 100vw;
+      height: 100vh;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0,0,0,0.8);
+      z-index: 20;
+    }
+
+    #final-message p {
+      font-size: 1.2rem;
+      text-align: center;
+      max-width: 600px;
+      padding: 20px;
+      animation: fadeInText 2s forwards;
+    }
+
+    /* Animații */
+    @keyframes fadeIn {
+      0%   { opacity: 0; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes fadeInText {
+      0%   { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Ecranul de apel -->
+  <div id="call-screen">
+    <div id="caller">Unknown</div>
+    <div id="status">Incoming video call...</div>
+    <div id="avatar"></div>
+    <div id="buttons-container">
+      <button id="decline-btn" class="call-button">Decline</button>
+      <button id="accept-btn" class="call-button">Accept</button>
+    </div>
+  </div>
+
+  <!-- Ecranul cu video (ascuns inițial) -->
+  <div id="video-screen">
+    <video id="videocall.mp4" controls preload="auto">
+      <!-- Asigură-te că pui calea corectă spre fișierul video dorit -->
+      <source src="video.mp4" type="video/mp4">
+      Browser-ul tău nu suportă tag-ul video.
+    </video>
+  </div>
+
+  <!-- Mesajul final (ascuns inițial) -->
+  <div id="final-message">
+    <p>Have you noticed that strange symbol? I hope you saved that for later...</p>
+  </div>
+
+  <!-- Sunetul de apel (autoplay + loop) -->
+  <!-- Asigură-te că pui calea corectă spre fișierul audio -->
+  <audio id="ringtone" src="duskwood_call.mp3" autoplay loop></audio>
+
+  <script>
+    const callScreen      = document.getElementById("call-screen");
+    const videoScreen     = document.getElementById("video-screen");
+    const finalMessage    = document.getElementById("final-message");
+
+    const declineBtn      = document.getElementById("decline-btn");
+    const acceptBtn       = document.getElementById("accept-btn");
+
+    const ringtone        = document.getElementById("ringtone");
+    const mysteriousVideo = document.getElementById("mysterious-video");
+
+    // Simulăm ce se întâmplă când utilizatorul dă Decline
+    declineBtn.addEventListener("click", () => {
+      // Închidem ecranul de apel, dar sunetul repornește după un timp (sau direct).
+      callScreen.style.display = "none";
+      ringtone.pause();
+      ringtone.currentTime = 0;
+
+      // Simulăm că "Unknown" sună din nou după 3 secunde
+      setTimeout(() => {
+        callScreen.style.display = "flex";
+        ringtone.play();
+      }, 3000);
+    });
+
+    // Când utilizatorul acceptă
+    acceptBtn.addEventListener("click", () => {
+      // Oprim sunetul de apel
+      ringtone.pause();
+      ringtone.currentTime = 0;
+
+      // Ascundem ecranul de apel și afișăm ecranul video
+      callScreen.style.display = "none";
+      videoScreen.style.display = "flex";
+
+      // Când se termină videoclipul, arătăm mesajul final
+      mysteriousVideo.addEventListener("ended", () => {
+        videoScreen.style.display = "none";
+        finalMessage.style.display = "flex";
+
+        // (Opțional) Putem face să dispară mesajul după câteva secunde
+        // setTimeout(() => {
+        //   finalMessage.style.display = "none";
+        // }, 5000);
+      });
+    });
+  </script>
+
+</body>
+</html>
